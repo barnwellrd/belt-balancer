@@ -739,7 +739,7 @@ function test_mod(player_index)
         -- fill buffer with stuff
         local part = part_functions.get_or_create(part_entity)
         local balancer_index = balancer_functions.find_from_part(part)
-        local balancer = global.balancer[balancer_index]
+        local balancer = storage.balancer[balancer_index]
         table.insert(balancer.buffer, { name = "iron-plate" })
         table.insert(balancer.buffer, { name = "iron-plate" })
         table.insert(balancer.buffer, { name = "iron-plate" })
@@ -764,7 +764,7 @@ function test_mod(player_index)
         -- fill buffer with stuff
         local part = part_functions.get_or_create(part_entity)
         local balancer_index = balancer_functions.find_from_part(part)
-        local balancer = global.balancer[balancer_index]
+        local balancer = storage.balancer[balancer_index]
         table.insert(balancer.buffer, { name = "iron-plate" })
         table.insert(balancer.buffer, { name = "iron-plate" })
         table.insert(balancer.buffer, { name = "iron-plate" })
@@ -1759,19 +1759,19 @@ function test_mod_logic(player_index)
 
     ---@return boolean true if everything is clear!
     local function is_clear()
-        return table_size(global.balancer) == 0 and table_size(global.parts)
-            and table_size(global.belts) and table_size(global.lanes)
+        return table_size(storage.balancer) == 0 and table_size(storage.parts)
+            and table_size(storage.belts) and table_size(storage.lanes)
     end
 
     local function print_all()
         print("Balancer:")
-        print(serpent.block(global.balancer))
+        print(serpent.block(storage.balancer))
         print("Parts:")
-        print(serpent.block(global.parts))
+        print(serpent.block(storage.parts))
         print("Belts:")
-        print(serpent.block(global.belts))
+        print(serpent.block(storage.belts))
         print("Lanes:")
-        print(serpent.block(global.lanes))
+        print(serpent.block(storage.lanes))
     end
 
     local current_x = 0

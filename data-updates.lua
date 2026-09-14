@@ -38,9 +38,9 @@ if mods["boblogistics"] then
 
     if data.raw.item["advanced-processing-unit"] then
         for k, v in pairs(data.raw.recipe["belt-balancer-ultimate-belt"].ingredients) do
-            if v[1] == "processing-unit" then
-                v[1] = "advanced-processing-unit"
-                v[2] = 3
+            if v.name == "processing-unit" then
+                v.name = "advanced-processing-unit"
+                v.amount = 3
                 break
             end
         end

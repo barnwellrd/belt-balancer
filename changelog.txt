@@ -1,4 +1,43 @@
 ---------------------------------------------------------------------------------------------------
+Version: 4.0.3
+Date: 09.14.2026
+  Bugfixes:
+    - Preserve health, durability, ammunition, tags, descriptions, and spoilage when items pass through a balancer.
+  Changes:
+    - Added Space Age turbo-belt research and recipe support.
+    - Added loader entity support, including build, removal, rotation, and direction handling.
+---------------------------------------------------------------------------------------------------
+Version: 4.0.2
+Date: 09.14.2026
+  Changes:
+    - Reduced runtime lane traversal and scheduler removal overhead at scale.
+    - Batched buffer transfers and preserved item quality.
+---------------------------------------------------------------------------------------------------
+Version: 4.0.1
+Date: 09.14.2026
+  Changes:
+    - Cached balancer lane counts outside the runtime hot path for large factories.
+---------------------------------------------------------------------------------------------------
+Version: 4.0.0
+Date: 09.14.2026
+  Major Features:
+    - Updated for Factorio 2.0.
+  Bugfixes:
+    - Fixed persistent-state and item-spill API incompatibilities.
+    - Fixed tracked-belt cursor cleanup using an undefined variable.
+  Changes:
+    - Replaced linear fast-replace tracking scans with spatial lookups.
+    - Replaced front-removal buffer operations with an O(1) FIFO.
+---------------------------------------------------------------------------------------------------
+Version: 3.2.2
+Date: 07.25.2024
+  Bugfix:
+    - Fixed issue with balancer output speed capping at 120 items per second. Now caps at 480 items per belt (240 per belt lane)
+    - Fixed issue with curved belts from belt lines running beside balancer counting as valid output belts if the curved belt turned away from the balancer
+  Changes:
+    - Slightly improved performace, but still performance heavy if belt speeds are greater than 60 items per second.
+    - Added mod settings option for toggling curved output belt behavior (ignore cureved output belts by default)
+---------------------------------------------------------------------------------------------------
 Version: 3.2.0
 Date: 10.07.2023
   Bugfix:

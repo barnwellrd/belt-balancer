@@ -5,11 +5,11 @@ data:extend {
         enabled = false,
         energy_required = 3,
         ingredients = {
-            { "iron-gear-wheel", 20 },
-            { "electronic-circuit", 15 },
-            { "transport-belt", 5 },
+            { type = "item", name = "iron-gear-wheel", amount = 20 },
+            { type = "item", name = "electronic-circuit", amount = 15 },
+            { type = "item", name = "transport-belt", amount = 5 },
         },
-        result = "balancer-part",
+        results = { { type = "item", name = "balancer-part", amount = 1 } },
         order = "g[balancer]-a[balancer]"
     },
     {
@@ -18,12 +18,12 @@ data:extend {
         enabled = false,
         energy_required = 2.5,
         ingredients = {
-            { "iron-gear-wheel", 20 },
-            { "electronic-circuit", 15 },
-            { "fast-transport-belt", 5 },
+            { type = "item", name = "iron-gear-wheel", amount = 20 },
+            { type = "item", name = "electronic-circuit", amount = 15 },
+            { type = "item", name = "fast-transport-belt", amount = 5 },
         },
         results = {
-            { "balancer-part", 2 }
+            { type = "item", name = "balancer-part", amount = 2 }
         },
         order = "g[balancer]-b[balancer]"
     },
@@ -33,16 +33,34 @@ data:extend {
         enabled = false,
         energy_required = 2,
         ingredients = {
-            { "iron-gear-wheel", 20 },
-            { "advanced-circuit", 15 },
-            { "express-transport-belt", 5 },
+            { type = "item", name = "iron-gear-wheel", amount = 20 },
+            { type = "item", name = "advanced-circuit", amount = 15 },
+            { type = "item", name = "express-transport-belt", amount = 5 },
         },
         results = {
-            { "balancer-part", 3 }
+            { type = "item", name = "balancer-part", amount = 3 }
         },
         order = "g[balancer]-c[balancer]"
     },
 }
+
+if mods["space-age"] and not mods["boblogistics"] then
+    data:extend {
+        {
+            type = "recipe",
+            name = "belt-balancer-turbo-belt",
+            enabled = false,
+            energy_required = 1.5,
+            ingredients = {
+                { type = "item", name = "iron-gear-wheel", amount = 20 },
+                { type = "item", name = "processing-unit", amount = 15 },
+                { type = "item", name = "express-transport-belt", amount = 5 },
+            },
+            results = { { type = "item", name = "balancer-part", amount = 4 } },
+            order = "g[balancer]-d[balancer]"
+        },
+    }
+end
 
 if mods["boblogistics"] then
     -- add recipes for the additional boblogistics belts
@@ -54,11 +72,11 @@ if mods["boblogistics"] then
                 enabled = false,
                 energy_required = 5,
                 ingredients = {
-                    { "iron-gear-wheel", 25 },
-                    { "electronic-circuit", 20 },
-                    { "basic-transport-belt", 10 },
+                    { type = "item", name = "iron-gear-wheel", amount = 25 },
+                    { type = "item", name = "electronic-circuit", amount = 20 },
+                    { type = "item", name = "basic-transport-belt", amount = 10 },
                 },
-                result = "balancer-part",
+                results = { { type = "item", name = "balancer-part", amount = 1 } },
                 order = "g[balancer]-0a[balancer]"
             },
         }
@@ -71,12 +89,12 @@ if mods["boblogistics"] then
             enabled = false,
             energy_required = 1.8,
             ingredients = {
-                { "iron-gear-wheel", 20 },
-                { "processing-unit", 3 },
-                { "turbo-transport-belt", 10 },
+                { type = "item", name = "iron-gear-wheel", amount = 20 },
+                { type = "item", name = "processing-unit", amount = 3 },
+                { type = "item", name = "turbo-transport-belt", amount = 10 },
             },
             results = {
-                { "balancer-part", 4 }
+                { type = "item", name = "balancer-part", amount = 4 }
             },
             order = "g[balancer]-d[balancer]"
         },
@@ -86,12 +104,12 @@ if mods["boblogistics"] then
             enabled = false,
             energy_required = 1.5,
             ingredients = {
-                { "iron-gear-wheel", 20 },
-                { "processing-unit", 5 },
-                { "ultimate-transport-belt", 10 },
+                { type = "item", name = "iron-gear-wheel", amount = 20 },
+                { type = "item", name = "processing-unit", amount = 5 },
+                { type = "item", name = "ultimate-transport-belt", amount = 10 },
             },
             results = {
-                { "balancer-part", 5 }
+                { type = "item", name = "balancer-part", amount = 5 }
             },
             order = "g[balancer]-e[balancer]"
         },
