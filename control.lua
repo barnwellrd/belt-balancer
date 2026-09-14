@@ -142,7 +142,7 @@ function built_entity(e)
         part_functions.built(entity)
     end
 
-    if entity.type == "transport-belt" then
+    if entity.type == "transport-belt" or belt_functions.is_loader(entity) then
         process_fast_replace(entity)
         belt_functions.built_belt(entity)
     end
@@ -163,6 +163,7 @@ script.on_event(
         defines.events.on_built_entity,
         defines.events.on_robot_built_entity,
         defines.events.script_raised_built,
+        defines.events.on_space_platform_built_entity,
         defines.events.script_raised_revive,
         defines.events.on_entity_cloned -- fix compatability with region cloner
     },
@@ -183,7 +184,7 @@ function remove_entity(e)
         part_functions.remove(entity, e.buffer)
     end
 
-    if entity.type == "transport-belt" then
+    if entity.type == "transport-belt" or belt_functions.is_loader(entity) then
         belt_functions.remove_belt(entity)
     end
 
@@ -208,7 +209,7 @@ script.on_event(
 
 script.on_event({ defines.events.on_player_rotated_entity },
     function(e)
-        if e.entity.type == "transport-belt" then
+        if e.entity.type == "transport-belt" or belt_functions.is_loader(e.entity) then
             belt_functions.remove_belt(e.entity, e.previous_direction)
             belt_functions.built_belt(e.entity)
         end

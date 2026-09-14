@@ -1,10 +1,10 @@
 {
   "name": "belt-balancer-performance",
-  "version": "4.0.2",
+  "version": "4.0.3",
   "title": "Belt Balancer (Improved Performance)",
   "author": "knoxfighter, archiehalliwell",
   "contact": "archie@halliwell.com.au",
   "factorio_version": "2.0",
-  "dependencies": ["base >= 2.0.0", "(?) boblogistics >= 2.0.0", "!belt-balancer"],
+  "dependencies": ["base >= 2.0.0", "(?) boblogistics >= 2.0.0", "(?) space-age", "(?) loaders-modernized", "(?) comfortable-loader", "!belt-balancer"],
   "description": "(Fork with performance improvement) Adds Balancer Parts, that can be put together, to balance all adjusting lanes."
 }

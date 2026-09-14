@@ -57,6 +57,29 @@ data:extend {
     }
 }
 
+if mods["space-age"] and not mods["boblogistics"] then
+    data:extend {
+        {
+            type = "technology",
+            name = "belt-balancer-4",
+            icon = "__belt-balancer-performance__/graphics/icons/balancer.png",
+            icon_size = 200,
+            effects = {
+                {
+                    type = "unlock-recipe",
+                    recipe = "belt-balancer-turbo-belt",
+                }
+            },
+            prerequisites = { "turbo-transport-belt", "belt-balancer-3" },
+            unit = {
+                count = technology.calc_cost_round(data.raw.technology["turbo-transport-belt"].unit.count, 50),
+                ingredients = data.raw.technology["turbo-transport-belt"].unit.ingredients,
+                time = data.raw.technology["turbo-transport-belt"].unit.time
+            },
+        }
+    }
+end
+
 -- add additional technologies for the boblogistics belts
 if mods["boblogistics"] then
     if settings.startup["bobmods-logistics-beltoverhaul"].value == true then

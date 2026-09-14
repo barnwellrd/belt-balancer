@@ -44,6 +44,24 @@ data:extend {
     },
 }
 
+if mods["space-age"] and not mods["boblogistics"] then
+    data:extend {
+        {
+            type = "recipe",
+            name = "belt-balancer-turbo-belt",
+            enabled = false,
+            energy_required = 1.5,
+            ingredients = {
+                { type = "item", name = "iron-gear-wheel", amount = 20 },
+                { type = "item", name = "processing-unit", amount = 15 },
+                { type = "item", name = "express-transport-belt", amount = 5 },
+            },
+            results = { { type = "item", name = "balancer-part", amount = 4 } },
+            order = "g[balancer]-d[balancer]"
+        },
+    }
+end
+
 if mods["boblogistics"] then
     -- add recipes for the additional boblogistics belts
     if settings.startup["bobmods-logistics-beltoverhaul"].value == true then

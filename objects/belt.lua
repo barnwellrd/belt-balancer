@@ -1,5 +1,11 @@
 belt_functions = {}
 
+---@param entity LuaEntity
+---@return boolean
+function belt_functions.is_loader(entity)
+    return entity.type == "loader" or entity.type == "loader-1x1"
+end
+
 function belt_functions.position_key(surface, position)
     return surface.index .. ":" .. position.x .. ":" .. position.y
 end
@@ -223,6 +229,14 @@ function belt_functions.built_belt(belt)
         if belt.belt_to_ground_type == "input" then
             into_part = nil
         elseif belt.belt_to_ground_type == "output" then
+            from_part = nil
+        end
+    end
+
+    if belt_functions.is_loader(belt) then
+        if belt.loader_type == "input" then
+            into_part = nil
+        elseif belt.loader_type == "output" then
             from_part = nil
         end
     end

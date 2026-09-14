@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 4.0.3
+Date: 09.14.2026
+  Bugfixes:
+    - Preserve health, durability, ammunition, tags, descriptions, and spoilage when items pass through a balancer.
+  Changes:
+    - Added Space Age turbo-belt research and recipe support.
+    - Added loader entity support, including build, removal, rotation, and direction handling.
+---------------------------------------------------------------------------------------------------
 Version: 4.0.2
 Date: 09.14.2026
   Changes:
