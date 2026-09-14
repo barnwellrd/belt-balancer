@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 4.0.2
+Date: 09.14.2026
+  Changes:
+    - Reduced runtime lane traversal and scheduler removal overhead at scale.
+    - Batched buffer transfers and preserved item quality.
+---------------------------------------------------------------------------------------------------
 Version: 4.0.1
 Date: 09.14.2026
   Changes:

@@ -25,9 +25,7 @@ script.on_load(reregister_on_tick)
 script.on_configuration_changed(
     function(e)
         belt_functions.rebuild_position_index()
-        for balancer_index in pairs(storage.balancer) do
-            balancer_functions.recalculate_nth_tick(balancer_index)
-        end
+        rebuild_on_tick()
 
         ---@type ModConfigurationChangedData
         local boblogistics_changes = e.mod_changes["boblogistics"]

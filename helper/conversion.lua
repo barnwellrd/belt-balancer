@@ -1,17 +1,21 @@
 ---convert_items_from_input_to_buffer
----@param balancer_index uint
+---@param balancer Balancer
 ---@param next_input uint
-function convert_items_from_input_to_buffer(balancer_index, next_input)
-    local balancer = storage.balancer[balancer_index]
+function convert_items_from_input_to_buffer(balancer, next_input)
     local ilane = balancer.input_lanes[next_input]
     local lane_size = #ilane
     if lane_size > 0 then
-        for i = 1,lane_size do
-            balancer_functions.push_buffer(balancer, {
-                name = ilane[i].name,
-                count = ilane[i].count})
+        local buffer = balancer.buffer
+        local last = balancer.buffer_last or #buffer
+        for i = 1, lane_size do
+            local item = ilane[i]
+            last = last + 1
+            buffer[last] = { name = item.name, count = item.count, quality = item.quality.name }
         end
-        -- Will always dump entire lane contents (up to all 4 items on belt lane) into buffer, so clear lane contents
+        balancer.buffer_first = balancer.buffer_first or 1
+        balancer.buffer_last = last
+        -- Will always dump the entire lane contents (up to all 4 item stacks) into the buffer.
         ilane.clear()
     end
+    return lane_size
 end
