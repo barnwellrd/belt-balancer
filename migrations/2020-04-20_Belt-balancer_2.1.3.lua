@@ -1,9 +1,9 @@
 -- add next_belt_check to the save
-global.next_belt_check = nil
+storage.next_belt_check = nil
 
 -- Iterate over all belts, update their layout and remove invalid ones.
-if global.belts then
-    for unit_number, belt in pairs(global.belts) do
+if storage.belts then
+    for unit_number, belt in pairs(storage.belts) do
         if belt.entity.valid then
             belt.position = belt.entity.position
             belt.direction = belt.entity.direction

@@ -14,7 +14,7 @@ end
 ---@param entity LuaEntity The balancer-part entity
 ---@return Part
 function part_functions.get_or_create(entity)
-    local global_part = global.parts[entity.unit_number]
+    local global_part = storage.parts[entity.unit_number]
     if global_part then
         return global_part
     end
@@ -26,7 +26,7 @@ function part_functions.get_or_create(entity)
 
     -- get balancer for this part
     part.balancer = balancer_functions.find_from_part(part)
-    local balancer = global.balancer[part.balancer]
+    local balancer = storage.balancer[part.balancer]
 
     -- find belts
     part.input_belts = {}
@@ -51,13 +51,13 @@ function part_functions.get_or_create(entity)
         if input_belt.lanes then
             for _, lane in pairs(input_belt.lanes) do
                 local belt_lane = belt.lanes[lane]
-                balancer.input_lanes[belt_lane] = global.lanes[belt_lane]
-                part.input_lanes[belt_lane] = global.lanes[belt_lane]
+                balancer.input_lanes[belt_lane] = storage.lanes[belt_lane]
+                part.input_lanes[belt_lane] = storage.lanes[belt_lane]
             end
         else
             for _, v in pairs(belt.lanes) do
-                balancer.input_lanes[v] = global.lanes[v]
-                part.input_lanes[v] = global.lanes[v]
+                balancer.input_lanes[v] = storage.lanes[v]
+                part.input_lanes[v] = storage.lanes[v]
             end
         end
     end
@@ -78,19 +78,19 @@ function part_functions.get_or_create(entity)
         if output_belt.lanes then
             for _, lane in pairs(output_belt.lanes) do
                 local belt_lane = belt.lanes[lane]
-                balancer.output_lanes[belt_lane] = global.lanes[belt_lane]
-                part.output_lanes[belt_lane] = global.lanes[belt_lane]
+                balancer.output_lanes[belt_lane] = storage.lanes[belt_lane]
+                part.output_lanes[belt_lane] = storage.lanes[belt_lane]
             end
         else
             for _, lane in pairs(belt.lanes) do
-                balancer.output_lanes[lane] = global.lanes[lane]
-                part.output_lanes[lane] = global.lanes[lane]
+                balancer.output_lanes[lane] = storage.lanes[lane]
+                part.output_lanes[lane] = storage.lanes[lane]
             end
         end
     end
 
-    -- set parts in global table
-    global.parts[entity.unit_number] = part
+    -- set parts in storage table
+    storage.parts[entity.unit_number] = part
 
     balancer_functions.recalculate_nth_tick(balancer.unit_number)
 
@@ -115,7 +115,7 @@ function part_functions.find_nearby_balancer(entity)
     -- remove source from found_parts
     for _, found_part in ipairs(found_parts) do
         if found_part.unit_number ~= entity.unit_number then
-            local part = global.parts[found_part.unit_number]
+            local part = storage.parts[found_part.unit_number]
             if part then
                 local balancer_id = part.balancer
                 if balancer_id then
@@ -193,17 +193,17 @@ end
 ---@param entity LuaEntity The part that got removed
 ---@param buffer LuaInventory
 function part_functions.remove(entity, buffer)
-    local part = global.parts[entity.unit_number]
-    local balancer = global.balancer[part.balancer]
+    local part = storage.parts[entity.unit_number]
+    local balancer = storage.balancer[part.balancer]
 
     -- remove part from balancer
     balancer.parts[entity.unit_number] = nil
 
-    -- remove part from global stack
-    global.parts[entity.unit_number] = nil
+    -- remove part from storage stack
+    storage.parts[entity.unit_number] = nil
 
     for _, belt_index in pairs(part.input_belts) do
-        local belt = global.belts[belt_index]
+        local belt = storage.belts[belt_index]
 
         -- only remove lanes, if this is splitter
         if belt.type == "splitter" then
@@ -255,7 +255,7 @@ function part_functions.remove(entity, buffer)
     end
 
     for _, belt_index in pairs(part.output_belts) do
-        local belt = global.belts[belt_index]
+        local belt = storage.belts[belt_index]
 
         -- only remove lanes, if this is splitter
         if belt.type == "splitter" then

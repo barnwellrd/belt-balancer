@@ -1,7 +1,7 @@
-global.next_belt_check, _ = next(global.belts, global.next_belt_check)
+storage.next_belt_check, _ = next(storage.belts, storage.next_belt_check)
 
-if global.balancer then
-    for _, balancer in pairs(global.balancer) do
+if storage.balancer then
+    for _, balancer in pairs(storage.balancer) do
 	balancer.next_output = next(balancer.output_lanes, balancer.last_success)
     end
 end

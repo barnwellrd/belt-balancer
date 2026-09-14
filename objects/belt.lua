@@ -1,12 +1,40 @@
 belt_functions = {}
 
----get belt, if not yet in global table, create it...
+function belt_functions.position_key(surface, position)
+    return surface.index .. ":" .. position.x .. ":" .. position.y
+end
+
+function belt_functions.index_belt(unit_number, surface, position)
+    storage.belts_by_position = storage.belts_by_position or {}
+    local key = belt_functions.position_key(surface, position)
+    local bucket = storage.belts_by_position[key] or {}
+    bucket[unit_number] = true
+    storage.belts_by_position[key] = bucket
+end
+
+function belt_functions.unindex_belt(unit_number, surface, position)
+    local key = belt_functions.position_key(surface, position)
+    local bucket = storage.belts_by_position and storage.belts_by_position[key]
+    if bucket then
+        bucket[unit_number] = nil
+        if next(bucket) == nil then storage.belts_by_position[key] = nil end
+    end
+end
+
+function belt_functions.rebuild_position_index()
+    storage.belts_by_position = {}
+    for unit_number, belt in pairs(storage.belts or {}) do
+        if belt.entity.valid then belt_functions.index_belt(unit_number, belt.surface, belt.position) end
+    end
+end
+
+---get belt, if not yet in storage table, create it...
 ---The Balancer is not added to the input/output tacker!
 ---@param belt_entity LuaEntity
 ---@return Belt The found or created belt
 function belt_functions.get_or_create(belt_entity)
-    -- find belt in global stack
-    local global_belt = global.belts[belt_entity.unit_number]
+    -- find belt in storage stack
+    local global_belt = storage.belts[belt_entity.unit_number]
     if global_belt then
         return global_belt
     end
@@ -30,16 +58,17 @@ function belt_functions.get_or_create(belt_entity)
         belt_count = belt_entity.get_max_transport_line_index()
     end
 
-    -- create list of lanes of this belt in global stack
+    -- create list of lanes of this belt in storage stack
     belt.lanes = {}
     for i = 1, belt_count do
         local index = get_next_lane_unit_number()
         local transport_line = belt_entity.get_transport_line(i)
-        global.lanes[index] = transport_line
+        storage.lanes[index] = transport_line
         belt.lanes[i] = index
     end
 
-    global.belts[belt_entity.unit_number] = belt
+    storage.belts[belt_entity.unit_number] = belt
+    belt_functions.index_belt(belt_entity.unit_number, belt.surface, belt.position)
 
     return belt
 end
@@ -216,12 +245,12 @@ function belt_functions.built_belt(belt)
         --add belt to part
         into_part.input_belts[belt.unit_number] = belt.unit_number
 
-        local balancer = global.balancer[into_part.balancer]
+        local balancer = storage.balancer[into_part.balancer]
         for _, lane in pairs(stack_belt.lanes) do
             -- add lanes to balancer
-            balancer.input_lanes[lane] = global.lanes[lane]
+            balancer.input_lanes[lane] = storage.lanes[lane]
             -- add lanes to part
-            into_part.input_lanes[lane] = global.lanes[lane]
+            into_part.input_lanes[lane] = storage.lanes[lane]
         end
 
         -- recalculate nth_tick on changed balancer
@@ -237,12 +266,12 @@ function belt_functions.built_belt(belt)
         --add belt to part
         from_part.output_belts[belt.unit_number] = belt.unit_number
 
-        local balancer = global.balancer[from_part.balancer]
+        local balancer = storage.balancer[from_part.balancer]
         for _, lane in pairs(stack_belt.lanes) do
             -- add lanes to balancer
-            balancer.output_lanes[lane] = global.lanes[lane]
+            balancer.output_lanes[lane] = storage.lanes[lane]
             -- add lanes to part
-            from_part.output_lanes[lane] = global.lanes[lane]
+            from_part.output_lanes[lane] = storage.lanes[lane]
         end
 
         -- recalculate nth_tick on changed balancer
@@ -264,14 +293,14 @@ function belt_functions.built_splitter(splitter_entity)
         --add belt to part
         into_part.part.input_belts[splitter_entity.unit_number] = splitter_entity.unit_number
 
-        local balancer = global.balancer[into_part.part.balancer]
+        local balancer = storage.balancer[into_part.part.balancer]
         for _, lane_index in pairs(into_part.lanes) do
             local lane = stack_belt.lanes[lane_index]
 
             --add lanes to balancer
-            balancer.input_lanes[lane] = global.lanes[lane]
+            balancer.input_lanes[lane] = storage.lanes[lane]
             --add lanes to part
-            into_part.part.input_lanes[lane] = global.lanes[lane]
+            into_part.part.input_lanes[lane] = storage.lanes[lane]
         end
 
         -- recalculate nth_tick on changed balancer
@@ -287,14 +316,14 @@ function belt_functions.built_splitter(splitter_entity)
         --add belt to part
         from_part.part.output_belts[splitter_entity.unit_number] = splitter_entity.unit_number
 
-        local balancer = global.balancer[from_part.part.balancer]
+        local balancer = storage.balancer[from_part.part.balancer]
         for _, lane_index in pairs(from_part.lanes) do
             local lane = stack_belt.lanes[lane_index]
             --add lanes to balancer
-            balancer.output_lanes[lane] = global.lanes[lane]
+            balancer.output_lanes[lane] = storage.lanes[lane]
 
             --add lanes to part
-            from_part.part.output_lanes[lane] = global.lanes[lane]
+            from_part.part.output_lanes[lane] = storage.lanes[lane]
         end
 
         -- recalculate nth_tick on changed balancer
@@ -313,23 +342,24 @@ function belt_functions.remove_belt(entity, direction, unit_number, surface, pos
     position = position or entity.position
 
     -- check if belt is tracked
-    local belt = global.belts[unit_number]
+    local belt = storage.belts[unit_number]
     if not belt then
         return
     end
 
-    -- remove lanes from global stack
+    -- remove lanes from storage stack
     for _, lane in pairs(belt.lanes) do
-        global.lanes[lane] = nil
+        storage.lanes[lane] = nil
     end
 
     -- make sure we don't try to next() this belt later
-    if unit_number == global.next_belt_check then
-        global.next_belt_check, _ = next(global.belts, global.next_belt_check)
+    if unit_number == storage.next_belt_check then
+        storage.next_belt_check, _ = next(storage.belts, storage.next_belt_check)
     end
     
-    -- remove belt from global stack
-    global.belts[unit_number] = nil
+    -- remove belt from storage stack
+    belt_functions.unindex_belt(unit_number, belt.surface, belt.position)
+    storage.belts[unit_number] = nil
 
     -- find input_output balancer
     local into_part, from_part = belt_functions.get_input_output_parts(entity, direction, surface, position)
@@ -338,7 +368,7 @@ function belt_functions.remove_belt(entity, direction, unit_number, surface, pos
         -- remove belt from part
         into_part.input_belts[unit_number] = nil
 
-        local balancer = global.balancer[into_part.balancer]
+        local balancer = storage.balancer[into_part.balancer]
         for _, lane in pairs(belt.lanes) do
             -- make sure it doesn't pick this one next
             if balancer.next_input == lane then 
@@ -355,7 +385,7 @@ function belt_functions.remove_belt(entity, direction, unit_number, surface, pos
         -- remove belt from part
         from_part.output_belts[unit_number] = nil
 
-        local balancer = global.balancer[from_part.balancer]
+        local balancer = storage.balancer[from_part.balancer]
         for _, lane in pairs(belt.lanes) do
             -- make sure it doesn't pick this one next
             if balancer.next_output == lane then 
@@ -386,30 +416,31 @@ function belt_functions.remove_splitter(entity, direction, unit_number, surface,
     unit_number = unit_number or entity.unit_number
 
     -- check if splitter is tracked
-    local belt = global.belts[unit_number]
+    local belt = storage.belts[unit_number]
     if not belt then
         return
     end
 
-    -- remove lanes from global stack
+    -- remove lanes from storage stack
     for _, lane in pairs(belt.lanes) do
-        global.lanes[lane] = nil
+        storage.lanes[lane] = nil
     end
 
     -- make sure we don't try to next() this belt later
-    if unit_number == global.next_belt_check then
-        global.next_belt_check, _ = next(global.belts, global.next_belt_check)
+    if unit_number == storage.next_belt_check then
+        storage.next_belt_check, _ = next(storage.belts, storage.next_belt_check)
     end
     
-    -- remove belt from global stack
-    global.belts[unit_number] = nil
+    -- remove belt from storage stack
+    belt_functions.unindex_belt(unit_number, belt.surface, belt.position)
+    storage.belts[unit_number] = nil
 
     local into_parts, from_parts = belt_functions.get_input_output_parts_splitter(entity, direction, surface, position)
     for _, part in pairs(into_parts) do
         -- remove belt from part
         part.part.input_belts[unit_number] = nil
 
-        local balancer = global.balancer[part.part.balancer]
+        local balancer = storage.balancer[part.part.balancer]
         for _, lane in pairs(belt.lanes) do
             -- make sure it doesn't pick this one next
             if balancer.next_input == lane then 
@@ -426,7 +457,7 @@ function belt_functions.remove_splitter(entity, direction, unit_number, surface,
         -- remove belt from part
         part.part.output_belts[unit_number] = nil
 
-        local balancer = global.balancer[part.part.balancer]
+        local balancer = storage.balancer[part.part.balancer]
         for _, lane in pairs(belt.lanes) do
             -- make sure it doesn't pick this one next
             if balancer.next_output == lane then 
@@ -449,24 +480,25 @@ function belt_functions.remove_splitter(entity, direction, unit_number, surface,
 end
 
 ---check if this belt has to be tracked (is attached to balancer)
----If not, then remove the belt and its lanes from the global stack
+---If not, then remove the belt and its lanes from the storage stack
 ---@param belt_index uint The belt to check
 function belt_functions.check_track(belt_index)
-    local belt = global.belts[belt_index]
+    local belt = storage.belts[belt_index]
     if table_size(belt.input_balancer) == 0 and table_size(belt.output_balancer) == 0 then
         -- belt is not needed
-        -- remove lanes from global stack
+        -- remove lanes from storage stack
         for _, lane in pairs(belt.lanes) do
-            global.lanes[lane] = nil
+            storage.lanes[lane] = nil
         end
 
         -- make sure we don't try to next() this belt later
-        if unit_number == global.next_belt_check then
-            global.next_belt_check, _ = next(global.belts, global.next_belt_check)
+        if belt_index == storage.next_belt_check then
+            storage.next_belt_check, _ = next(storage.belts, storage.next_belt_check)
         end
         
-        -- remove belt from global stack
-        global.belts[belt_index] = nil
+        -- remove belt from storage stack
+        belt_functions.unindex_belt(belt_index, belt.surface, belt.position)
+        storage.belts[belt_index] = nil
 
     end
 end

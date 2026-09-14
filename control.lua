@@ -7,15 +7,16 @@ require("test")
 
 -- on new savegame and on adding mod to existing save
 script.on_init(function()
-    -- set defaults and initialize values in global table
-    global.next_balancer_unit_number = 1
-    global.next_lane_unit_number = 1
-    global.next_belt_check = nil
-    global.balancer = {}
-    global.parts = {}
-    global.belts = {}
-    global.lanes = {}
-    global.events = {}
+    -- set defaults and initialize values in storage table
+    storage.next_balancer_unit_number = 1
+    storage.next_lane_unit_number = 1
+    storage.next_belt_check = nil
+    storage.balancer = {}
+    storage.parts = {}
+    storage.belts = {}
+    storage.lanes = {}
+    storage.events = {}
+    storage.belts_by_position = {}
 end)
 
 script.on_load(reregister_on_tick)
@@ -23,6 +24,11 @@ script.on_load(reregister_on_tick)
 -- If some mod is changed, check if boblogistics got added and do stuff :)
 script.on_configuration_changed(
     function(e)
+        belt_functions.rebuild_position_index()
+        for balancer_index in pairs(storage.balancer) do
+            balancer_functions.recalculate_nth_tick(balancer_index)
+        end
+
         ---@type ModConfigurationChangedData
         local boblogistics_changes = e.mod_changes["boblogistics"]
 
@@ -42,17 +48,17 @@ script.on_configuration_changed(
 
 -- Custom command to print out some statistics
 commands.add_command("belt-balancer-statistics", "", function(e)
-    local balancer_amount = table_size(global.balancer)
-    local balancer_part_amount = table_size(global.parts)
+    local balancer_amount = table_size(storage.balancer)
+    local balancer_part_amount = table_size(storage.parts)
     local balancer_input_belt_amount = 0
     local balancer_output_belt_amount = 0
     local balancer_input_lane_amount = 0
     local balancer_output_lane_amount = 0
 
-    for _, balancer in pairs(global.balancer) do
+    for _, balancer in pairs(storage.balancer) do
         for _, v in pairs(balancer.parts) do
-            balancer_input_belt_amount = balancer_input_belt_amount + table_size(global.parts[v].input_belts)
-            balancer_output_belt_amount = balancer_output_belt_amount + table_size(global.parts[v].output_belts)
+            balancer_input_belt_amount = balancer_input_belt_amount + table_size(storage.parts[v].input_belts)
+            balancer_output_belt_amount = balancer_output_belt_amount + table_size(storage.parts[v].output_belts)
         end
         balancer_input_lane_amount = balancer_input_lane_amount + table_size(balancer.input_lanes)
         balancer_output_lane_amount = balancer_output_lane_amount + table_size(balancer.output_lanes)
@@ -81,13 +87,13 @@ if debug and script.active_mods["creative-mod"] then
 
     commands.add_command("belt-balancer-print", "", function(e)
         print("Balancer:")
-        print(serpent.block(global.balancer))
+        print(serpent.block(storage.balancer))
         print("Parts:")
-        print(serpent.block(global.parts))
+        print(serpent.block(storage.parts))
         print("Belts:")
-        print(serpent.block(global.belts))
+        print(serpent.block(storage.belts))
         print("Lanes:")
-        print(serpent.block(global.lanes))
+        print(serpent.block(storage.lanes))
     end)
 end
 
@@ -97,13 +103,18 @@ end
 function process_fast_replace(new_entity)
     local belts = {}
 
-    for unit_number, belt in pairs(global.belts) do
-        -- only run, when entities overlapping and are on the same surface
-        if new_entity.surface == belt.surface
-            and  belt.position.x >= new_entity.position.x - 0.5 and belt.position.x <= new_entity.position.x + 0.5
-            and belt.position.y >= new_entity.position.y - 0.5 and belt.position.y <= new_entity.position.y + 0.5 then
-
-            belts[unit_number] = belt
+    -- Fast replacement used to scan every tracked belt. Limit the lookup to the
+    -- nine positions that can overlap a belt or splitter footprint instead.
+    for x_offset = -0.5, 0.5, 0.5 do
+        for y_offset = -0.5, 0.5, 0.5 do
+            local position = { x = new_entity.position.x + x_offset, y = new_entity.position.y + y_offset }
+            local bucket = storage.belts_by_position[belt_functions.position_key(new_entity.surface, position)]
+            if bucket then
+                for unit_number in pairs(bucket) do
+                    local belt = storage.belts[unit_number]
+                    if belt then belts[unit_number] = belt end
+                end
+            end
         end
     end
 
@@ -226,8 +237,8 @@ script.on_event({ defines.events.on_player_rotated_entity },
 )
 
 script.on_event(defines.events.on_tick, function()
-    local unit_number = global.next_belt_check
-    local belt = global.belts[unit_number]
+    local unit_number = storage.next_belt_check
+    local belt = storage.belts[unit_number]
 
     -- check if belt direction got changed
     if belt and belt.entity.valid and belt.direction ~= belt.entity.direction then
@@ -241,5 +252,5 @@ script.on_event(defines.events.on_tick, function()
         end
     end
 
-    global.next_belt_check, _ = next(global.belts, unit_number)
+    storage.next_belt_check, _ = next(storage.belts, unit_number)
 end)

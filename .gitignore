@@ -5,3 +5,5 @@
 .vscode/settings.json
 
 objects/balancer copy.lua
+
+.tools/

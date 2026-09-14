@@ -1,7 +1,7 @@
 local function clear_belt_table(tab)
     local to_remove = {}
     for _, belt_index in pairs(tab) do
-        local belt = global.belts[belt_index]
+        local belt = storage.belts[belt_index]
         if not belt then
             table.insert(to_remove, belt_index)
         end
@@ -14,7 +14,7 @@ end
 local function clear_lane_table(tab)
     local to_remove = {}
     for _, lane_index in pairs(tab) do
-        local lane = global.lanes[lane_index]
+        local lane = storage.lanes[lane_index]
         if not lane then
             table.insert(to_remove, lane_index)
         end
@@ -25,8 +25,8 @@ local function clear_lane_table(tab)
 end
 
 -- clear all unknown belts and lanes from parts
-if global.parts then
-    for _, part in pairs(global.parts) do
+if storage.parts then
+    for _, part in pairs(storage.parts) do
         clear_belt_table(part.input_belts)
         clear_belt_table(part.output_belts)
         clear_lane_table(part.input_lanes)
